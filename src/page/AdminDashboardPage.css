@@ -1,0 +1,227 @@
+.dashboard-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 50px;
+    color: #0d2403;
+    font-weight: bold;
+    margin-bottom: 50px;
+    margin-top: 50px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+}
+.dashboard-subtitle {
+    font-size: 20px;
+    color: #0d2403;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-bottom: 20px;
+}
+.toggleButton {
+    width: 60px;
+    height: 30px;
+    border-radius: 15px;
+    background-color: #0d2403;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 12px;
+    border: 0px solid black;
+
+}
+.Access-NoAccess {
+    font-size: 10px;
+    color: #0d2403;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.toggleButton.active {
+   
+    background-color: #007bff;
+    margin: 10px;
+    border: 0px solid black;
+}
+
+.expert-item {
+ background-color: #f1d5c3;
+ width: 100%;
+ 
+ max-width: 200px;
+ display: flex;
+ flex-direction: column;
+ justify-content: center;
+ align-items: center;
+ border-radius: 16px;
+ padding: 15px;
+ box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+ .expert-item {
+   max-width: 100%;
+ }
+}
+
+.expert-item-active {
+    background-color: #d1fae1;
+}
+.toggleButton .toggle-circle {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: #fff;
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.expert-name {
+    font-size: 17px;
+    color: black;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+}
+.experts-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    background-color: white;
+    gap: 20px;
+    max-width: 780px;
+    padding: 10px;
+    border-radius: 9px;
+    border: 0px solid black;
+    margin: 0px;
+}
+.toggleButton.active .toggle-circle {
+    transform: translateX(30px);
+}
+
+.add-department-button {
+    background-color: white;
+    color: #0d2403;
+    border-radius: 9px;
+    font-size: 17px;
+    font-weight: bold;
+    padding: 35px;
+    border: 0px solid black;
+    cursor: pointer;
+
+}
+
+.add-department-button:hover {
+    color: #6b8374;
+   
+    
+}
+
+
+.department-select {
+    background-color: white;
+    border-radius: 9px;
+    font-size: 17px;
+    font-weight: bold;
+    padding: 5px;
+}
+
+.department-projectsContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    border: 2px solid black;
+    height:35px;
+    width: 800px;
+    border-radius: 9px;
+    padding-left: 15px;
+    
+
+
+
+}
+
+.department-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.projects-list {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    
+    
+}
+
+.project-option {
+    font-size: 17px;
+    color: #007bff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold; 
+}
+
+.project-select {
+    font-size: 17px;
+    color: black;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold; 
+    background-color: white;
+    border: none;
+}
+
+.department-name {
+    font-size: 17px;
+    color: black;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold; 
+}
+
+.department-description {
+    font-size: 17px;
+    color: rgb(255, 255, 255);
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold; 
+    background-color: #0d2403;
+    padding: 8px;
+}
+
+.admin-dashboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.department-buttons-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 10px;
+    background-color: white;
+    border-radius: 9px;
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+.accordion-experts-button {
+    background-color: white;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.delete-department-button {
+    background-color: white;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
