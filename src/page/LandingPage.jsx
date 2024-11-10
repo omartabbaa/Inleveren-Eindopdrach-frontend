@@ -1,35 +1,40 @@
 import React, { useState } from 'react';
 import './LandingPage.css';
-import image from '../Components/assets/Landingpage/12.png';
+import image from '../Components/assets/Landingpage/HowCanIHelpImage.png';
 import Discord from '../Components/assets/socialmedia/Discord.png';
 import Youtube from '../Components/assets/socialmedia/Youtube.png';
 import Email from '../Components/assets/socialmedia/Email.png';
-import Admin from '../Components/assets/Landingpage/Admin.png';
+import Admin from '../Components/assets/Landingpage/supporthub-departments.png';
+import GetUsers from '../Components/Lists/getUsers/GetUsers';
+import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
-    const [activeIndex, setActiveIndex] = useState(null);
+    // Start with the first item open by default (index 0)
+    const [activeIndex, setActiveIndex] = useState(0);
 
+    // Only change the active index if a different item is clicked
     const toggleAccordion = (index) => {
-        setActiveIndex(activeIndex === index ? null : index);
+        setActiveIndex(index);
     };
 
     return (
         <div className="landing-page">
             <header className="landing-page-header">
-                <h1 className="landing-page-title">Landing Page</h1>
-                <div className="hero-text-container">
+                <h1 className="landing-page-title">Changing support forever</h1>
+                <div className="hero-text-container">   
                     <h1 className="hero-title">Welcome to Support Hub</h1>
                     <p className="hero-description">We are here to help you with your questions and issues.</p>
                 </div>
-
             </header>
             <section className="hero">
-             
-                <button className="cta-button">Get Started</button>
+                <Link to="/signup" className="cta-button">Get Started</Link>
                 <div className="hero-image-container">
-                <img src={image} alt="Support Hub Hero" className="hero-image" />
+                    <img src={image} alt="Support Hub Hero" className="hero-image" />
                 </div>
+
+
             </section>
+
             <main className="main-content">
                 <div className="main-container">
                     <div className="accordion-container">
@@ -43,24 +48,28 @@ const LandingPage = () => {
                                 title: "Permissions & Control",
                                 content: "Manage access and control with our robust permissions system, ensuring the right people have the right level of access to your support hub."
                             },
-                            {
-                                title: "Analytics and Insights",
-                                content: "Gain valuable insights into your support operations with our comprehensive analytics tools, helping you make data-driven decisions."
-                            },
+                          
                             {
                                 title: "Centralized Management",
                                 content: "Manage all your departments, projects, and team members through a single, easy-to-use interface. SupportHub brings your team together in one platform."
                             }
                         ].map((item, index) => (
                             <div className="accordion-item" key={index}>
-                                <h3 className="accordion-item-title" onClick={() => toggleAccordion(index)}>{item.title}</h3>
+                                <h3 
+                                    className="accordion-item-title" 
+                                    onClick={() => toggleAccordion(index)}
+                                >
+                                    {item.title}
+                                </h3>
                                 {activeIndex === index && <p className="accordion-item-content">{item.content}</p>}
                             </div>
                         ))}
                     </div>
                     <img src={Admin} alt="Support Hub Features" className="main-image" />
                 </div>
+               
             </main>
+
             <footer className="landing-page-footer">
                 <h2 className="footer-title">Social Media Links</h2>
                 <div className="social-media-links">

@@ -5,22 +5,20 @@ import BusinessIcon from '../../assets/Button/navbar/BusinessIcon.png';
 import AdminIcon from '../../assets/Button/navbar/AdminIcon.png';
 import NotificationIcon from '../../assets/Button/navbar/NotificationIcon.png';
 import { useState, useEffect, useRef } from 'react';
+import { useUserContext } from "../../../context/LoginContext";
+import axios from 'axios'; // Import axios
 
 const Navbar = () => {
-
+    const { logout, isLogin, role, stateBusinessId } = useUserContext(); // Changed businessId to stateBusinessId
+    
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-
+    const [businessName, setBusinessName] = useState('');
     const notificationRef = useRef(null);
     const profileRef = useRef(null);
 
-    const toggleNotification = () => {
-        setIsNotificationOpen(prev => !prev);
-    };
-
-    const toggleProfile = () => {
-        setIsProfileOpen(prev => !prev);
-    }
+    const toggleNotification = () => setIsNotificationOpen(prev => !prev);
+    const toggleProfile = () => setIsProfileOpen(prev => !prev);
 
     const closeDropdowns = (event) => {
         if (notificationRef.current && !notificationRef.current.contains(event.target)) {
@@ -31,44 +29,61 @@ const Navbar = () => {
         }
     };
 
+    const handleLogout = () => logout();
+
+    const fetchBusinesses = async () => {
+        if (!stateBusinessId) return; // Ensure stateBusinessId is available before fetching
+        
+        try {
+            const response = await axios.get(`http://localhost:8080/api/businesses/${stateBusinessId}`);
+            setBusinessName(response.data.name); // Assuming the response has a `name` property
+            console.log("Fetched business name:", response.data.name);
+            console.log("dfjjdsnfkjs",businessName)
+        } catch (error) {
+            console.error("Error fetching business:", error);
+        }
+    };
+
     useEffect(() => {
+        fetchBusinesses(); // Fetch the business name when the component mounts or stateBusinessId changes
         document.addEventListener('mousedown', closeDropdowns);
         return () => {
             document.removeEventListener('mousedown', closeDropdowns);
         };
-    }, []);
+    }, [stateBusinessId]); // Add stateBusinessId as a dependency so it refetches if stateBusinessId changes
 
-    
     return (
         <div className='navbar'>
-           
             <div className='navbar-container'>
                 <div className='navbar-left'>
                     <Link to="/">
                         <img className='logo-img' src={logo} alt="logo" />
                     </Link>
+
                     <Link className='navbar-link' to="/business-overview">
                         Business
                         <img className='business-icon' src={BusinessIcon} alt="BusinessIcon" />
                     </Link>
-                    <Link className='navbar-link' to="/department-project-management">Mij Business</Link>
+
+                    <Link className='navbar-link' to={`/department-project-management/${stateBusinessId}/${businessName}`}>
+                        {businessName || "My Business"} {/* Display businessName or fallback text */}
+                    </Link>
                 </div>
                 <div className='navbar-right'>
-                    <Link className='navbar-link' to="/admin-dashboard">
-                        Dashboard 
-                        <img className='admin-icon' src={AdminIcon} alt="AdminIcon" />
-                    </Link>
-
+                    {role === "ROLE_ADMIN" && (
+                        <Link className='navbar-link' to="/admin-dashboard">
+                            Dashboard 
+                            <img className='admin-icon' src={AdminIcon} alt="AdminIcon" />
+                        </Link>
+                    )}
+                    
                     {/* Notification Dropdown */}
-                    <div 
-                        className='dropdown-container' 
-                        ref={notificationRef}
-                    >
-                        <img 
-                            onClick={toggleNotification} 
-                            className='notification-icon' 
-                            src={NotificationIcon} 
-                            alt="NotificationIcon" 
+                    <div className='dropdown-container' ref={notificationRef}>
+                        <img
+                            onClick={toggleNotification}
+                            className='notification-icon'
+                            src={NotificationIcon}
+                            alt="NotificationIcon"
                         />
                         {isNotificationOpen && (
                             <div className='notification-dropdown'>
@@ -83,31 +98,26 @@ const Navbar = () => {
                     </div>
 
                     {/* Profile Dropdown */}
-                    <div 
-                        className='dropdown-container' 
-                        ref={profileRef}
-                    >
-                        <div 
-                            onClick={toggleProfile} 
-                            className='profile'
-                        ></div>
+                    <div className='dropdown-container' ref={profileRef}>
+                        <div onClick={toggleProfile} className='profile'></div>
                         {isProfileOpen && (
                             <div className='profile-dropdown'>
                                 <h3>Profile</h3>
                                 <ul>
-                                    <li>Profile 1</li>
-                                    <li>Profile 2</li>
-                                    <li>Profile 3</li>
+                                    <Link to="/signup"><li>Signup</li></Link>
+                                    {isLogin ? (
+                                        <button onClick={handleLogout}>Logout</button>
+                                    ) : (
+                                        <Link to="/login"><li>Login</li></Link>
+                                    )}
                                 </ul>
-                            </div>  
+                            </div>
                         )}
                     </div>
-                 
                 </div>
-
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default Navbar;
