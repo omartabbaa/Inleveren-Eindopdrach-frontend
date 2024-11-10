@@ -252,9 +252,7 @@ const GridMapComponent = () => {
       <div className="DepartmentProjectManagementPageHeader">
   <h1 className="DepartmentProjectManagementPageTitle">{businessName}</h1>
 </div>
-    {/*  <div className="search-container">
-        <Search >
-      </div>*/}
+
       {departments.map((department, index) => (
         <div key={`dept-${department.id || index}`}>
           <div className='DepartmentHeader'>
