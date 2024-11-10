@@ -9,9 +9,7 @@ const DepartmentProjectManagementPage = () => {
     ];
     return (
         <div>
-<div className="DepartmentProjectManagementPageHeader">
-<h1 className="DepartmentProjectManagementPageTitle">Department & Project Management</h1>
-</div>
+
           
             
             <div className="DepartmentProjectManagementPage">

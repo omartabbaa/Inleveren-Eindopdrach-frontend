@@ -10,23 +10,27 @@ import QuestionDetailPage from './page/QuestionDetailPage';
 import AdmnDashboardPage from './page/AdmnDashboardPage';
 import NotFoundPage from './page/NotFoundPage';
 import Navbar from './Components/Sections/navbar/navbar';
+import Login from './page/Login';
+import SignUp from './page/signUp';
+
 function App() {
   const [count, setCount] = useState(0)
 
   return (
-    <>
+    <body>
       <Navbar />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/business-overview" element={<BusinessOverviewPage />} />
-        <Route path="/department-project-management" element={<DepartmentProjectManagementPage />} />
-        <Route path="/question-overview/:department/:project" element={<QuestionOverviewPage />} />
-        <Route path="/question-detail/:questionId/:title/:question" element={<QuestionDetailPage />} />
-
+        <Route path="/department-project-management/:businessId/:businessName" element={<DepartmentProjectManagementPage />} />
+        <Route path="/question-overview/:department/:project/:projectId" element={<QuestionOverviewPage />} />
+        <Route path="/question-detail/:questionId/:title/:question/:projectId" element={<QuestionDetailPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
         <Route path="/admin-dashboard" element={<AdmnDashboardPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-    </>
+    </body>
 
 
   )
