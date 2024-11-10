@@ -103,7 +103,7 @@ const GridMapComponent = () => {
       }));
       setProjects(projects);
     } catch (error) {
-      console.error('Error fetching projects:', error);
+     
       setError('Failed to fetch projects. Please try again later.');
     }
   };
@@ -120,10 +120,10 @@ const GridMapComponent = () => {
         averageResponseTime: newProjectAverageResponseTime,
         departmentId: departmentId
       };
-      console.log("Sending project data:", projectData);
+   
   
       const response = await axios.post('http://localhost:8080/api/projects', projectData);
-      console.log('Project added:', response.data);
+    
       fetchProjects();
       setModalVisible(false);
     } catch (error) {
@@ -147,7 +147,7 @@ const GridMapComponent = () => {
         description: newDepartmentDescription,
         businessId: businessId, // Associate with businessId
       });
-      console.log('Department added:', response.data);
+   
       fetchDepartments();
       setModalVisible(false);
     } catch (error) {
@@ -167,7 +167,7 @@ const GridMapComponent = () => {
         averageResponseTime: newProjectAverageResponseTime,
         departmentId: selectedDepartmentId 
       });
-      console.log('Project updated:', response.data);
+   
       fetchProjects();
       setModalVisible(false);
     } catch (error) {
