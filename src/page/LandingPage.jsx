@@ -40,7 +40,7 @@ const LandingPage = () => {
                         <h2 className="accordion-title">Everything in One Hub</h2>
                         {[
                             {
-                                title: "Real-Time Question Management",
+                                title: "Question Management",
                                 content: "SupportHub provides a platform for real-time question management, allowing you to efficiently handle and respond to inquiries as they come in."
                             },
                             {
