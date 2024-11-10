@@ -44,7 +44,7 @@ const LandingPage = () => {
                                 content: "SupportHub provides a platform for real-time question management, allowing you to efficiently handle and respond to inquiries as they come in."
                             },
                             {
-                                title: "Permissions & Control",
+                                title: "Admin has access to Permissions & Control.",
                                 content: "Manage access and control with our robust permissions system, ensuring the right people have the right level of access to your support hub."
                             },
                           
