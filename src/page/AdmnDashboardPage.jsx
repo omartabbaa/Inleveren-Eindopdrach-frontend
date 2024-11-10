@@ -1,121 +1,292 @@
+// AdminDashboardPage.js
+
 import './AdminDashboardPage.css';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useUserContext } from "../context/LoginContext";
 
-import { useState } from 'react';
-const AdmnDashboardPage = () => {
-    const [expertBackroundColor, setExpertBackroundColor] = useState('');
-    const [departments, setDepartments] = React.useState([
-        "Department 1",
-        "Department 2",
-        "Department 3"
-    ]);
-
+const AdminDashboardPage = () => {
+    const { token, stateBusinessId } = useUserContext();
+    const [hoveredExpertId, setHoveredExpertId] = useState(null);
+    const [departments, setDepartments] = useState([]);
+    const [experts, setExperts] = useState([]);
+    const [projects, setProjects] = useState([]);
+    const [permissions, setPermissions] = useState([]);
     const [toggleStates, setToggleStates] = useState({});
-    const [selectedDepartment, setSelectedDepartment] = useState('');
+    // Updated state variable for open accordion
+    const [openAccordionId, setOpenAccordionId] = useState(null);
+    const [isPermissionFormVisible, setIsPermissionFormVisible] = useState(false);
+    const [formData, setFormData] = useState({
+        selectedDepartment: '',
+        selectedProject: '',
+        selectedUser: '',
+        canAnswer: false
+    });
+    const [stateAdmin, setStateAdmin] = useState([]);
 
-    const [accordionStates, setAccordionStates] = useState({});
-    const [selectedDepartmentToDelete, setSelectedDepartmentToDelete] = useState('');
-
-    const projects = [
-        "Project A", "Project B", "Project C", "Project D", "Project E", "Project F"
-    ];
-
-    const experts = [
-        "Expert A", "Expert B", "Expert C", "Expert D", "Expert E", "Expert F", "Expert G", "Expert H", "Expert I"
-    ];
-
-    const allDepartments = [
-        "Department 1", "Department 2", "Department 3", "Department 4", "Department 5",
-        "Department 6", "Department 7", "Department 8", "Department 9", "Department 10"
-    ];
-
-    const addDepartment = () => {
-        if (selectedDepartment) {
-            setDepartments([...departments, selectedDepartment]);
-            setSelectedDepartment('');
+    // Fetch data on component mount and token change
+    useEffect(() => {
+        if (token) {
+            fetchAndSetData();
         }
-        console.log(departments);
+    }, [token]);
+
+    // Combined function to fetch initial data
+    const fetchAndSetData = () => {
+        fetchDepartments();
+        fetchExperts();
+        fetchProjects();
+        fetchPermissions();
+        fetchAdminData();
     };
 
-    const handleToggle = (deptIndex, expertIndex) => {
-        const toggleId = `${deptIndex}-${expertIndex}`;
-        setToggleStates(states => ({
-            ...states,
-            [toggleId]: !states[toggleId]
+    const fetchAdminData = async () => {
+        try {
+            const response = await axios.get('http://localhost:8080/api/admins', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const filteredAdmin = response.data.filter(admin => admin.businessId === stateBusinessId);
+
+            setStateAdmin(filteredAdmin);
+
+            console.log('Fetched Admin Data:', response.data);
+            console.log('Filtered Admin Data:', filteredAdmin);
+        } catch (error) {
+            console.error('Error fetching Admin:', error);
+            throw error; // Propagate error to be caught in fetchAndSetData
+        }
+    };
+
+    // Fetch departments
+    const fetchDepartments = async () => {
+        try {
+            const response = await axios.get('http://localhost:8080/api/departments', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const filteredDepartments = response.data.filter(dept => dept.businessId === stateBusinessId);
+            setDepartments(filteredDepartments);
+            console.log("Fetched Departments:", response.data);
+            console.log("Filtered Departments:", filteredDepartments);
+        } catch (error) {
+            console.error('Error fetching departments:', error);
+        }
+    };
+
+    // Fetch experts
+    const fetchExperts = async () => {
+        try {
+            const response = await axios.get('http://localhost:8080/api/users', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            // Extract admin userIds
+            const adminUserIds = stateAdmin.map(admin => admin.userId);
+
+            // Filter experts whose userId is NOT in adminUserIds
+            const filteredExperts = response.data.filter(expert => !adminUserIds.includes(expert.userId));
+
+            setExperts(filteredExperts);
+
+            console.log('Fetched Experts:', response.data);
+            console.log('Filtered Experts:', filteredExperts);
+        } catch (error) {
+            console.error('Error fetching experts:', error);
+            throw error; // Propagate error to be caught in fetchAndSetData
+        }
+    };
+
+    // Fetch projects
+    const fetchProjects = async () => {
+        try {
+            const response = await axios.get('http://localhost:8080/api/projects', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setProjects(response.data);
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+        }
+    };
+
+    // Fetch permissions
+    const fetchPermissions = async () => {
+        try {
+            const response = await axios.get('http://localhost:8080/api/permissions', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setPermissions(response.data);
+            initializeToggleStates(response.data);
+        } catch (error) {
+            console.error('Error fetching permissions:', error);
+        }
+    };
+
+    // Initialize toggle states
+    const initializeToggleStates = (permissionsData) => {
+        const newToggleStates = {};
+        permissionsData.forEach(permission => {
+            const toggleId = createToggleId(permission.departmentId, permission.projectId, permission.userId);
+            newToggleStates[toggleId] = permission.canAnswer;
+        });
+        setToggleStates(newToggleStates);
+    };
+
+    // Create toggle ID
+    const createToggleId = (departmentId, projectId, userId) =>
+        `${departmentId || 'dept'}-${projectId || 'proj'}-${userId}`;
+
+    // Handle permission toggle
+    const handleToggle = async (deptIndex, expertIndex, projectId = null) => {
+        const department = departments[deptIndex];
+        const expert = experts[expertIndex];
+        const toggleId = createToggleId(department.departmentId, projectId, expert.userId);
+
+        const newCanAnswer = !toggleStates[toggleId];
+        const previousToggleStates = { ...toggleStates };
+
+        // Update toggle state optimistically
+        setToggleStates(prevStates => ({
+            ...prevStates,
+            [toggleId]: newCanAnswer
         }));
+
+        try {
+            const existingPermission = permissions.find(permission =>
+                permission.userId === expert.userId &&
+                permission.departmentId === department.departmentId &&
+                permission.projectId === projectId
+            );
+
+            if (existingPermission) {
+                await axios.patch(`http://localhost:8080/api/permissions/${existingPermission.permissionId}`, {
+                    userId: expert.userId,
+                    departmentId: department.departmentId,
+                    projectId: projectId,
+                    canAnswer: newCanAnswer
+                });
+                console.log(newCanAnswer, 'patch')
+            } else {
+                const response = await axios.post('http://localhost:8080/api/permissions', {
+                    userId: expert.userId,
+                    departmentId: department.departmentId,
+                    projectId: projectId,
+                    canAnswer: newCanAnswer
+                });
+                setPermissions([...permissions, response.data]);
+                console.log('post',newCanAnswer)
+            }
+        } catch (error) {
+            console.error('Error updating permission:', error);
+            setToggleStates(previousToggleStates);
+        }
     };
 
-    const expandAccordion = (deptIndex, department) => {
-        const accordionId = `${deptIndex}-${department}`;
-        setAccordionStates(prev => ({
-            ...prev,
-            [accordionId]: !prev[accordionId]
-        }));
-        console.log("expand accordion");
+    // Expand accordion
+    const expandAccordion = (departmentId) => {
+        setOpenAccordionId(prevId => (prevId === departmentId ? null : departmentId));
     };
 
-    const deleteDepartment = (deptIndex, departmentToDelete) => {
-        setDepartments(departments.filter((dept, index) => index !== deptIndex));
-        console.log("Department deleted:", departmentToDelete);
+    // Show permission form
+    const handleAddPermission = () => setIsPermissionFormVisible(true);
+
+    // Submit new permission
+    const submitPermission = async () => {
+        const { selectedUser, selectedDepartment, selectedProject, canAnswer } = formData;
+        if (selectedUser && selectedDepartment) {
+            try {
+                await axios.post('http://localhost:8080/api/permissions', {
+                    userId: selectedUser,
+                    departmentId: selectedDepartment,
+                    projectId: selectedProject || null,
+                    canAnswer
+                });
+                fetchPermissions();
+                setIsPermissionFormVisible(false);
+                resetForm();
+            } catch (error) {
+                console.error('Error adding permission:', error);
+            }
+        } else {
+            alert("Please select a user and a department.");
+        }
     };
+
+    // Reset form data
+    const resetForm = () => setFormData({
+        selectedDepartment: '',
+        selectedProject: '',
+        selectedUser: '',
+        canAnswer: false
+    });
+
+    // Update form data
+    const updateFormData = (field, value) =>
+        setFormData(prev => ({ ...prev, [field]: value }));
 
     return (
         <div className="admin-dashboard">
-            <h1 className="dashboard-title">Admin Dashboard
-            <h2 className="dashboard-subtitle">Grant targeted access to expert agents for answering tickets related to specific products or entire product categories.</h2>
-            </h1>
-           
-            
+            <h1 className="dashboard-title">Admin Dashboard</h1>
+            <h2 className="dashboard-subtitle">
+                Grant targeted access to expert agents for answering tickets related to specific products or entire product categories.
+            </h2>
+
             <div className="department-grid">
-             
-                    {departments.map((department, deptIndex) => (
-                        <div key={deptIndex} className="department-card">
+                {departments.map((department, deptIndex) => (
+                    <div key={department.departmentId} className="department-card">
+                        <div className="department-header">
+                            <h2 className="department-name">{department.departmentName}</h2>
+                            <button
+                                onClick={() => expandAccordion(department.departmentId)}
+                                className="accordion-experts-button"
+                            >
+                                {openAccordionId === department.departmentId ? '-' : '+'}
+                            </button>
+                        </div>
                         
-                        <span className="department-projectsContainer">
-                            <h2 className="department-name">{department}</h2>
-                            <h3 className="department-description">Give access to expert agents</h3>
-                       
-                            <div className="projects-list">
-                                <ul className="project-select-container">
-                                    <select className="project-select">
-                                        <option className="project-option" value="all">All Projects</option>
-                                        {projects.map((project, projIndex) => (
-                                            <option className="project-option" key={projIndex} value={project}>{project}</option>
-                                        ))}
-                                    </select>
-                                </ul>
-                              
-
-                            </div>
-                            <div className="department-buttons-container">
-                                <button onClick={() => expandAccordion(deptIndex, department)} className="accordion-experts-button">
-                                    {accordionStates[`${deptIndex}-${department}`] ? '-' : '+'}
-                                </button>
-                                <button onClick={() => deleteDepartment(deptIndex, department)} className="delete-department-button">X</button>
-                            </div>
-                        </span>
-
-                        {accordionStates[`${deptIndex}-${department}`] && (
+                        {openAccordionId === department.departmentId && (
                             <div className="experts-list">
                                 <ul className="experts-container">
                                     {experts.map((expert, expertIndex) => {
-                                        const toggleId = `${deptIndex}-${expertIndex}`;
+                                        const departmentToggleId = createToggleId(department.departmentId, null, expert.userId);
+
                                         return (
-                                            <li key={expertIndex} className={`expert-item ${toggleStates[toggleId] ? "expert-item-active" : ""}`}>
-                                                <>
-                                                    <div className='expert-item-container'>
-                                                        <span className="expert-name">{expert}</span>
-                                                        <button
-                                                            className={`toggleButton${toggleStates[toggleId] ? " active" : ""}`}
-                                                            onClick={() => handleToggle(deptIndex, expertIndex)}
-                                                        >
-                                                            <div className="toggle-circle"></div>
-                                                        </button>
+                                            <li
+                                                key={expert.userId}
+                                                className={`expert-item ${toggleStates[departmentToggleId] ? "expert-item-active" : ""}`}
+                                                onMouseEnter={() => setHoveredExpertId(expert.userId)}
+                                                onMouseLeave={() => setHoveredExpertId(null)}
+                                                id="container"
+                                            >
+                                                <div className='expert-item-container'>
+                                                    <span className="expert-name">{expert.name}</span>
+                                                    {/* Uncomment if you want to add a toggle button for the expert */}
+                                                    {/* <button
+                                                        className={`toggleButton ${toggleStates[departmentToggleId] ? "active" : ""}`}
+                                                        onClick={() => handleToggle(deptIndex, expertIndex)}
+                                                    >
+                                                        <div className="toggle-circle"></div>
+                                                    </button> */}
+                                                </div>
+
+                                                {/* Conditionally render projects when hovering over the expert */}
+                                                {hoveredExpertId === expert.userId && (
+                                                    <div className='section_projects_container'>
+                                                        {projects.filter(project => project.departmentId === department.departmentId).map(project => {
+                                                            const projectToggleId = createToggleId(department.departmentId, project.projectId, expert.userId);
+                                                            return (
+                                                                <div key={project.projectId} className="project-permission">
+                                                                    <span className="project-name">{project.name}</span>
+                                                                    <button
+                                                                        className={`toggleButton ${toggleStates[projectToggleId] ? "active" : ""}`}
+                                                                        onClick={() => handleToggle(deptIndex, expertIndex, project.projectId)}
+                                                                    >
+                                                                        <div className="toggle-circle"></div>
+                                                                    </button>
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
-                                                    <h4 className='Access-NoAccess'>{toggleStates[toggleId] ? "Access" : "No Access"}</h4>
-                                                </>
+                                                )}
                                             </li>
-                                            
                                         );
                                     })}
                                 </ul>
@@ -125,22 +296,47 @@ const AdmnDashboardPage = () => {
                 ))}
             </div>
 
-            <div className="add-department-container">
-                <select 
-                    className="department-select"
-                    value={selectedDepartment} 
-                    onChange={(e) => setSelectedDepartment(e.target.value)}
-                >
-                    <option value="">Select a product category</option>
-                    {allDepartments.map((dept, index) => (
-                        <option key={index} value={dept}>{dept}</option>
-                    ))}
-                </select>
-                <button className="add-department-button" onClick={addDepartment}>Add Product Category</button>
-            </div>
+            {/* Add Permission Form */}
+            <button className="add-permission-button" onClick={handleAddPermission}>Add Permission</button>
+            {isPermissionFormVisible && (
+                <div className="permission-form">
+                    <h3>Add New Permission</h3>
+                    <select value={formData.selectedUser} onChange={(e) => updateFormData('selectedUser', e.target.value)}>
+                        <option value="">Select User</option>
+                        {experts.map(expert => (
+                            <option key={expert.userId} value={expert.userId}>{expert.name}</option>
+                        ))}
+                    </select>
+                    <select value={formData.selectedDepartment} onChange={(e) => updateFormData('selectedDepartment', e.target.value)}>
+                        <option value="">Select Department</option>
+                        {departments.map(department => (
+                            <option key={department.departmentId} value={department.departmentId}>{department.departmentName}</option>
+                        ))}
+                    </select>
+                    <select value={formData.selectedProject} onChange={(e) => updateFormData('selectedProject', e.target.value)}>
+                        <option value="">Select Project (optional)</option>
+                        {projects
+                            .filter(project => project.departmentId === formData.selectedDepartment)
+                            .map(project => (
+                                <option key={project.projectId} value={project.projectId}>{project.name}</option>
+                            ))
+                        }
+                    </select>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={formData.canAnswer}
+                            onChange={() => updateFormData('canAnswer', !formData.canAnswer)}
+                        />
+                        Can Answer
+                    </label>
+                    <button onClick={submitPermission}>Submit Permission</button>
+                    <button onClick={() => setIsPermissionFormVisible(false)}>Cancel</button>
+                </div>
+            )}
         </div>
     );
+
 };
 
-export default AdmnDashboardPage;
-
+export default AdminDashboardPage;
