@@ -12,7 +12,6 @@ const LandingPage = () => {
     // Start with the first item open by default (index 0)
     const [activeIndex, setActiveIndex] = useState(0);
 
-    // Only change the active index if a different item is clicked
     const toggleAccordion = (index) => {
         setActiveIndex(index);
     };
@@ -27,7 +26,7 @@ const LandingPage = () => {
                 </div>
             </header>
             <section className="hero">
-                <Link to="/signup" className="cta-button">Get Started</Link>
+                <Link to="/signup" className="cta-button">Start</Link>
                 <div className="hero-image-container">
                     <img src={image} alt="Support Hub Hero" className="hero-image" />
                 </div>
